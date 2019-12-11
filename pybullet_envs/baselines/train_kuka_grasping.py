@@ -7,7 +7,9 @@ os.sys.path.insert(0, parentdir)
 import gym
 from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
 
-from baselines import deepq
+from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines.deepq.policies import MlpPolicy
+from stable_baselines import DQN
 
 import datetime
 
@@ -25,18 +27,11 @@ def callback(lcl, glb):
 def main():
 
   env = KukaGymEnv(renders=False, isDiscrete=True)
-  model = deepq.models.mlp([64])
-  act = deepq.learn(env,
-                    q_func=model,
-                    lr=1e-3,
-                    max_timesteps=10000000,
-                    buffer_size=50000,
-                    exploration_fraction=0.1,
-                    exploration_final_eps=0.02,
-                    print_freq=10,
-                    callback=callback)
+  model = DQN(MlpPolicy, env, verbose=1,buffer_size=50000,exploration_final_eps=0.02,exploration_initial_eps=0.1)
+  model.learn(1000000,
+                    log_interval=100)
   print("Saving model to kuka_model.pkl")
-  act.save("kuka_model.pkl")
+  model.save("kuka_model")
 
 
 if __name__ == '__main__':

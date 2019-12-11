@@ -6,13 +6,15 @@ os.sys.path.insert(0, parentdir)
 
 import gym
 from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
-
+from stable_baselines.deepq.policies import MlpPolicy
+from stable_baselines import DQN
 from baselines import deepq
 
 
 def main():
 
   env = KukaGymEnv(renders=True, isDiscrete=True)
+  act = DQN.load("kuka_model")
   #act = deepq.load("kuka_model.pkl")
   #print(act)
   while True:
@@ -23,11 +25,10 @@ def main():
     episode_rew = 0
     while not done:
       env.render()
-      a = env.action_space.sample()
-      print(a)
+      action, _states = act.predict(obs)
+      obs, rewards, done, info = env.step(action)
       #obs, rew, done, _ = env.step(act(obs[None])[0])
-      obs, rew, done, _ = env.step(a)
-      episode_rew += rew
+      episode_rew += rewards
     print("Episode reward", episode_rew)
 
 
