@@ -33,19 +33,18 @@ class ContinuousDownwardBiasPolicy(object):
     if np.random.random() < self._height_hack_prob:
       dz = -1
       dx = -0.1
-    return [dx, dy, dz, da, 0]
+    return [dx, dy, dz, da, close]
 
 
 def main():
 
-  env = KukaDiverseObjectEnv(renders=True, isDiscrete=False)
+  env = KukaDiverseObjectEnv(renders=True, isDiscrete=False, removeHeightHack=True)
   policy = ContinuousDownwardBiasPolicy()
 
   while True:
     obs, done = env.reset(), False
     print("===================================")
     print("obs")
-    print(obs)
     episode_rew = 0
     while not done:
       env.render(mode='human')

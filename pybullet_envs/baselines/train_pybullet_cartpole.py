@@ -9,7 +9,7 @@ from pybullet_envs.bullet.cartpole_bullet import CartPoleBulletEnv
 
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.deepq.policies import MlpPolicy
-from stable_baselines import DQN
+from stable_baselines import DDPG
 
 
 def callback(lcl, glb):
@@ -21,7 +21,7 @@ def callback(lcl, glb):
 def main():
 
   env = CartPoleBulletEnv(renders=False)
-  model = DQN(MlpPolicy, env, verbose=1)
+  model = DDPG(MlpPolicy, env, verbose=1)
   model.learn(total_timesteps=500000)
   model.save("deepq_cartpole")
   print("Saving model to deepq_cartpole")
