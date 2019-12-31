@@ -26,7 +26,7 @@ class KukaGymEnv(gym.Env):
 
   def __init__(self,
                urdfRoot=pybullet_data.getDataPath(),
-               actionRepeat=1,
+               actionRepeat=80,
                isEnableSelfCollision=True,
                renders=False,
                isDiscrete=False,
@@ -65,10 +65,11 @@ class KukaGymEnv(gym.Env):
     if (self._isDiscrete):
       self.action_space = spaces.Discrete(7)
     else:
-      action_dim = 3
+      action_dim = 4
+      space_low = np.array([-1,-1,-1])
+      space_high = np.array([1, 1, 1])
       self._action_bound = 1
-      action_high = np.array([self._action_bound] * action_dim)
-      self.action_space = spaces.Box(-action_high, action_high)
+      self.action_space = spaces.Box(space_low, space_high, dtype=np.float32)
     self.observation_space = spaces.Box(-observation_high, observation_high)
     self.viewer = None
 
@@ -85,7 +86,7 @@ class KukaGymEnv(gym.Env):
 
     xpos = 0.55 + 0.12 * random.random()
     ypos = 0 + 0.2 * random.random()
-    ang = 3.14 * 0.5 + 3.1415925438 * random.random()
+    ang = 3.14 * 0.5+ 3.1415925438 * 0.01*random.random()
     orn = p.getQuaternionFromEuler([0, 0, ang])
     self.blockUid = p.loadURDF(os.path.join(self._urdfRoot, "block.urdf"), xpos, ypos, -0.15,
                                orn[0], orn[1], orn[2], orn[3])
@@ -141,31 +142,35 @@ class KukaGymEnv(gym.Env):
 
   def step(self, action):
     if (self._isDiscrete):
-      dv = 0.005
-      dx = [0, -dv, dv, 0, 0, 0, 0][action]
-      dy = [0, 0, 0, -dv, dv, 0, 0][action]
-      da = [0, 0, 0, 0, 0, -0.05, 0.05][action]
+      dv = 0.03
+      # dx = dv*action[0]
+      # dy = dv*action[1]
+      dx = [0, -dv, dv, 0, 0, dv, -dv][action]
+      dy = [0, 0, 0, -dv, dv, dv, -dv][action]
+      da = [0, 0, 0, 0, 0, -0.15, 0.15][action]
       f = 0.3
-      realAction = [dx, dy, -0.002, da, f]
+      realAction = [dx, dy, -0.05, 0, f]
     else:
       #print("action[0]=", str(action[0]))
-      dv = 0.005
+      dv = 0.1
       dx = action[0] * dv
       dy = action[1] * dv
-      da = action[2] * 0.05
+      #dz = action[2] * dv
+      da = action[2] * 0.1
       f = 0.3
-      realAction = [dx, dy, -0.002, da, f]
+      realAction = [dx, dy, -0.1, da, f]
     return self.step2(realAction)
 
   def step2(self, action):
+    self._kuka.applyAction(action)
     for i in range(self._actionRepeat):
-      self._kuka.applyAction(action)
       p.stepSimulation()
+      if self._renders:
+        time.sleep(self._timeStep)
       if self._termination():
         break
-      self._envStepCounter += 1
-    if self._renders:
-      time.sleep(self._timeStep)
+    self._envStepCounter += 1
+
     self._observation = self.getExtendedObservation()
 
     #print("self._envStepCounter")
@@ -185,6 +190,9 @@ class KukaGymEnv(gym.Env):
     #print("len=%r" % len(self._observation))
 
     return np.array(self._observation), reward, done, {}
+
+  def debug_text(self, text):
+    self._p.addUserDebugText(text,[0.8,0.2,0.5],textSize = 3,textColorRGB = [1,0.2,0.2])
 
   def render(self, mode="rgb_array", close=False):
     if mode != "rgb_array":
@@ -275,7 +283,7 @@ class KukaGymEnv(gym.Env):
       reward = -closestPoints[0][8] * 10
     if (blockPos[2] > 0.2):
       reward = reward + 10000
-      print("successfully grasped a block!!!")
+      #print("successfully grasped a block!!!")
       #print("self._envStepCounter")
       #print(self._envStepCounter)
       #print("self._envStepCounter")

@@ -22,7 +22,7 @@ class Kuka:
     self.fingerTipForce = 2
     self.useInverseKinematics = 1
     self.useSimulation = 1
-    self.useNullSpace = 21
+    self.useNullSpace = 0
     self.useOrientation = 1
     self.kukaEndEffectorIndex = 6
     self.kukaGripperIndex = 7
@@ -153,8 +153,7 @@ class Kuka:
           jointPoses = p.calculateInverseKinematics(self.kukaUid,
                                                     self.kukaEndEffectorIndex,
                                                     pos,
-                                                    orn,
-                                                    jointDamping=self.jd)
+                                                    [0,1,0,0])
         else:
           jointPoses = p.calculateInverseKinematics(self.kukaUid, self.kukaEndEffectorIndex, pos)
 
