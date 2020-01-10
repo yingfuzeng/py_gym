@@ -10,8 +10,9 @@ from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
 from pybullet_envs.bullet.kukaGymFullEnv import KukaGymFullEnv
 from pybullet_envs.bullet.kukaGymRotationEnv import KukaGymRotationEnv
 from stable_baselines.common.policies import MlpPolicy
+from pybullet_envs.bullet.kukaGymCamEnv import KukaGymCamEnv
 
-from stable_baselines import PPO1
+from stable_baselines import PPO1,PPO2
 
 from stable_baselines.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise, AdaptiveParamNoiseSpec
 from stable_baselines import DDPG,TRPO,DQN
@@ -20,8 +21,8 @@ from stable_baselines import DDPG,TRPO,DQN
 
 def main():
   random_policy = False
-  #env = KukaGymRotationEnv(renders=True, isDiscrete=False,maxSteps=15)
-  env = KukaGymFullEnv(renders=True, isDiscrete=False, maxSteps=15)
+  env = KukaGymFullEnv(renders=True, isDiscrete=False,maxSteps=15)
+  #env = KukaGymCamEnv(renders=True, isDiscrete=False, maxSteps=15)
 
   model = PPO1.load("ppo_kuka_full_5M")
   total_grasps = 0
@@ -31,7 +32,7 @@ def main():
     obs, dones = env.reset(), False
     print("===================================")
     print("obs")
-    print(obs)
+    #print(obs)
     episode_rew = 0
     while not dones:
       if random_policy:

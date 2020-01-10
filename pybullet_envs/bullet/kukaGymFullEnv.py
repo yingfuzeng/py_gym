@@ -233,7 +233,7 @@ class KukaGymFullEnv(gym.Env):
     if (self.terminated or self._envStepCounter > self._maxSteps):
       self._observation = self.getExtendedObservation()
       return True
-    maxDist = 0.005
+    maxDist = 0.03
     closestPoints = p.getClosestPoints(self._kuka.trayUid, self._kuka.kukaUid, maxDist)
 
     if (len(closestPoints)):  #(actualEndEffectorPos[2] <= -0.43):
@@ -247,6 +247,8 @@ class KukaGymFullEnv(gym.Env):
         self._kuka.applyAction(graspAction)
         p.stepSimulation()
         fingerAngle = fingerAngle - (0.3 / 100.)
+        if self._renders:
+          time.sleep(self._timeStep)
         if (fingerAngle < 0):
           fingerAngle = 0
 
@@ -259,6 +261,8 @@ class KukaGymFullEnv(gym.Env):
           #print("BLOCKPOS!")
           #print(blockPos[2])
           break
+        if self._renders:
+          time.sleep(self._timeStep)
         state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
         actualEndEffectorPos = state[0]
         if (actualEndEffectorPos[2] > 0.5):

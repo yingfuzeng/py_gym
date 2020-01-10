@@ -9,6 +9,7 @@ import tensorflow as tf
 from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
 from pybullet_envs.bullet.kukaGymCamEnv import KukaGymCamEnv
 from pybullet_envs.bullet.kukaGymRotationEnv import KukaGymRotationEnv
+from pybullet_envs.bullet.kuka_diverse_object_gym_env import KukaDiverseObjectEnv
 
 from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy
 from stable_baselines.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise, AdaptiveParamNoiseSpec
@@ -34,14 +35,14 @@ class CustomPolicy(FeedForwardPolicy):
     super(CustomPolicy, self).__init__(*args, **kwargs, cnn_extractor=modified_cnn, feature_extraction="cnn")
 def main():
 
-  env = KukaGymCamEnv(renders=False, isDiscrete=True,maxSteps=15)
+  env = KukaDiverseObjectEnv(renders=False, isDiscrete=True,maxSteps=15)
   #model = DQN.load("deepq_kuka_rotation_100K")
   #model.set_env(env)
   #model = DQN(MlpPolicy, env, verbose=1,exploration_final_eps=0.05,tensorboard_log="./DQN_r_1M")
-  model = DQN(CnnPolicy, env, verbose=1, exploration_final_eps=0.02, tensorboard_log="./DQN_cam_1M")
+  model = DQN(CnnPolicy, env, verbose=1, exploration_final_eps=0.02, tensorboard_log="./DQN_diverse_100K")
   #model.tensorboard_log = "./DQN_r_500k"
-  model.learn(total_timesteps=1000000)
-  model.save("deepq_kuka_cam_1M")
+  model.learn(total_timesteps=100000)
+  model.save("deepq_kuka_diverse_100K")
 
   print("Saving model to kuka_model.pkl")
 

@@ -26,13 +26,13 @@ class KukaGymCamEnv(gym.Env):
 
   def __init__(self,
                urdfRoot=pybullet_data.getDataPath(),
-               actionRepeat=70,
+               actionRepeat=80,
                isEnableSelfCollision=True,
                renders=False,
                isDiscrete=False,
                cameraRandom=0,
-               width=80,
-               height=80,
+               width=82,
+               height=82,
                maxSteps=1000):
     #print("KukaGymEnv __init__")
     self._isDiscrete = isDiscrete
@@ -154,11 +154,11 @@ class KukaGymCamEnv(gym.Env):
       realAction = [dx, dy, -0.03, da, f]
     else:
       #print("action[0]=", str(action[0]))
-      dv = 0.03
+      dv = 0.05
       dx = action[0] * dv
       dy = action[1] * dv
       #dz = action[2] * dv
-      da = action[2] * 0.25
+      da = action[2] * 0.3
       f = 0.3
       realAction = [dx, dy, -0.03, da, f]
     return self.step2(realAction)
@@ -168,7 +168,8 @@ class KukaGymCamEnv(gym.Env):
     for i in range(self._actionRepeat):
       p.stepSimulation()
       if self._renders:
-        time.sleep(self._timeStep)
+        pass
+        #time.sleep(self._timeStep)
       if self._termination():
         break
     self._envStepCounter += 1
@@ -185,7 +186,7 @@ class KukaGymCamEnv(gym.Env):
     actionCost = 0#np.linalg.norm(npaction) * 10.
     #print("actionCost")
     #print(actionCost)
-    reward = self._reward() - actionCost
+    reward = self._reward()
     #print("reward")
     #print(reward)
 
@@ -226,29 +227,31 @@ class KukaGymCamEnv(gym.Env):
     return rgb_array
 
   def _termination(self):
-    #print (self._kuka.endEffectorPos[2])
+    # print (self._kuka.endEffectorPos[2])
     state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
     actualEndEffectorPos = state[0]
 
-    #print("self._envStepCounter")
-    #print(self._envStepCounter)
+    # print("self._envStepCounter")
+    # print(self._envStepCounter)
     if (self.terminated or self._envStepCounter > self._maxSteps):
       self._observation = self._get_observation()
       return True
-    maxDist = 0.005
+    maxDist = 0.01
     closestPoints = p.getClosestPoints(self._kuka.trayUid, self._kuka.kukaUid, maxDist)
 
-    if (len(closestPoints)):  #(actualEndEffectorPos[2] <= -0.43):
+    if (len(closestPoints)):  # (actualEndEffectorPos[2] <= -0.43):
       self.terminated = 1
 
-      #print("terminating, closing gripper, attempting grasp")
-      #start grasp and terminate
+      # print("terminating, closing gripper, attempting grasp")
+      # start grasp and terminate
       fingerAngle = 0.3
       for i in range(100):
         graspAction = [0, 0, 0.0001, 0, fingerAngle]
         self._kuka.applyAction(graspAction)
         p.stepSimulation()
         fingerAngle = fingerAngle - (0.3 / 100.)
+        if self._renders:
+          time.sleep(self._timeStep)
         if (fingerAngle < 0):
           fingerAngle = 0
 
@@ -258,9 +261,11 @@ class KukaGymCamEnv(gym.Env):
         p.stepSimulation()
         blockPos, blockOrn = p.getBasePositionAndOrientation(self.blockUid)
         if (blockPos[2] > 0.23):
-          #print("BLOCKPOS!")
-          #print(blockPos[2])
+          # print("BLOCKPOS!")
+          # print(blockPos[2])
           break
+        if self._renders:
+          time.sleep(self._timeStep)
         state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
         actualEndEffectorPos = state[0]
         if (actualEndEffectorPos[2] > 0.5):
@@ -277,15 +282,15 @@ class KukaGymCamEnv(gym.Env):
     closestPoints = p.getClosestPoints(self.blockUid, self._kuka.kukaUid, 1000, -1,
                                        self._kuka.kukaEndEffectorIndex)
 
-    reward = -1000
 
+    reward = -1000
     numPt = len(closestPoints)
     #print(numPt)
     if (numPt > 0):
       #print("reward:")
       reward = -closestPoints[0][8] * 10
     if (blockPos[2] > 0.2):
-      reward = reward + 10000
+      reward =  reward+ 10000
       #print("successfully grasped a block!!!")
       #print("self._envStepCounter")
       #print(self._envStepCounter)

@@ -103,6 +103,11 @@ class KukaDiverseObjectEnv(KukaGymEnv):
       if self._removeHeightHack:
         self.action_space = spaces.Box(low=-1, high=1, shape=(4,))  # dx, dy, dz, da
     self.viewer = None
+    img_space = spaces.Box(
+      low=0,
+      high=255,
+      shape=(self._height, self._width, 3))
+    self.observation_space = img_space
 
   def reset(self):
     """Environment reset called at the beginning of an episode.
@@ -195,7 +200,8 @@ class KukaDiverseObjectEnv(KukaGymEnv):
     dv = self._dv  # velocity per physics step.
     if self._isDiscrete:
       # Static type assertion for integers.
-      assert isinstance(action, int)
+      #print("action is:" + str(action))
+      #assert isinstance(action, int)
       if self._removeHeightHack:
         dx = [0, -dv, dv, 0, 0, 0, 0, 0, 0][action]
         dy = [0, 0, 0, -dv, dv, 0, 0, 0, 0][action]
