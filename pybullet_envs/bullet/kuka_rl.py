@@ -27,13 +27,13 @@ class Kuka:
     self.kukaEndEffectorIndex = 6
     self.kukaGripperIndex = 7
     #lower limits for null space
-    # self.ll = [-.967, -2, -2.96, 0.19, -2.96, -2.09, -3.05]
-    # #upper limits for null space
-    # self.ul = [.967, 2, 2.96, 2.29, 2.96, 2.09, 3.05]
-    # #joint ranges for null space
-    # self.jr = [5.8, 4, 5.8, 4, 5.8, 4, 6]
-    # #restposes for null space
-    # self.rp = [0, 0, 0, 0.5 * math.pi, 0, -math.pi * 0.5 * 0.66, 0]
+    self.ll = [-.967, -2, -2.96, 0.19, -2.96, -2.09, -3.05]
+    #upper limits for null space
+    self.ul = [.967, 2, 2.96, 2.29, 2.96, 2.09, 3.05]
+    #joint ranges for null space
+    self.jr = [5.8, 4, 5.8, 4, 5.8, 4, 6]
+    #restposes for null space
+    self.rp = [0, 0, 0, 0.5 * math.pi, 0, -math.pi * 0.5 * 0.66, 0]
     #joint damping coefficents
     self.jd = [
         0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001,
@@ -42,21 +42,16 @@ class Kuka:
     self.reset()
 
   def reset(self):
-    objects = p.loadSDF(os.path.join(self.urdfRootPath, "kuka_iiwa/kuka_with_gripper.sdf"))
+    objects = p.loadSDF(os.path.join(self.urdfRootPath, "kuka_iiwa/kuka_with_gripper2.sdf"))
     self.kukaUid = objects[0]
     #for i in range (p.getNumJoints(self.kukaUid)):
     #  print(p.getJointInfo(self.kukaUid,i))
-    p.resetBasePositionAndOrientation(self.kukaUid, [0.5000, 0.100000, 0.3000],
-                                      [0.000000, 0.000000, 0.000000, 1.0000])
-    # self.jointPositions = [
-    #     -0.33, 0.001, -0.011401, -1.589317, 0.005379, 1.137684, -0.006539, 0.000048,
-    #     -0.299912, 0.000000, -0.000043, 0.299960, 0.000000, -0.000200
-    # ]
+    p.resetBasePositionAndOrientation(self.kukaUid, [-0.100000, 0.000000, 0.070000],
+                                      [0.000000, 0.000000, 0.000000, 1.000000])
     self.jointPositions = [
-        0.35, -0.55, -0.22, 2.08, 0.23, -0.52, -0.44, 0.01,
-        -0.01, 0.000000, -0.000043, 0.0060, 0.000000, -0.000200
+        0.006418, 0.413184, -0.011401, -1.589317, 0.005379, 1.137684, -0.006539, 0.000048,
+        -0.299912, 0.000000, -0.000043, 0.299960, 0.000000, -0.000200
     ]
-
     self.numJoints = p.getNumJoints(self.kukaUid)
     for jointIndex in range(self.numJoints):
       p.resetJointState(self.kukaUid, jointIndex, self.jointPositions[jointIndex])
@@ -66,10 +61,8 @@ class Kuka:
                               targetPosition=self.jointPositions[jointIndex],
                               force=self.maxForce)
 
-    #self.trayUid = p.loadURDF(os.path.join(self.urdfRootPath, "cover.urdf"),[0.6, 0, -0.21])
-    p.stepSimulation()
-    c_p = self.current_pos()
-    self.endEffectorPos = [c_p[0],c_p[1],c_p[2] ]
+    self.trayUid = p.loadURDF(os.path.join(self.urdfRootPath, "cover.urdf"),[0.6, 0, -0.21])
+    self.endEffectorPos = [0.537, 0.0, 0.5]
     self.endEffectorAngle = 0
 
     self.motorNames = []
@@ -156,27 +149,27 @@ class Kuka:
                               p.POSITION_CONTROL,
                               targetPosition=self.endEffectorAngle,
                               force=self.maxForce)
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         8,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=-0.4,
-      #                         force=self.fingerAForce)
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         11,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=0.4,
-      #                         force=self.fingerBForce)
-      #
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         10,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=0,
-      #                         force=self.fingerTipForce)
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         13,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=0,
-      #                         force=self.fingerTipForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              8,
+                              p.POSITION_CONTROL,
+                              targetPosition=-0.4,
+                              force=self.fingerAForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              11,
+                              p.POSITION_CONTROL,
+                              targetPosition=0.4,
+                              force=self.fingerBForce)
+
+      p.setJointMotorControl2(self.kukaUid,
+                              10,
+                              p.POSITION_CONTROL,
+                              targetPosition=0,
+                              force=self.fingerTipForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              13,
+                              p.POSITION_CONTROL,
+                              targetPosition=0,
+                              force=self.fingerTipForce)
 
 
 
@@ -184,19 +177,24 @@ class Kuka:
       p.setJointMotorControl2(self.kukaUid,
                               8,
                               p.POSITION_CONTROL,
+                              targetPosition=-fingerAngle,
+                              force=self.fingerAForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              11,
+                              p.POSITION_CONTROL,
                               targetPosition=fingerAngle,
-                              force=100)
+                              force=self.fingerBForce)
 
       p.setJointMotorControl2(self.kukaUid,
                               10,
                               p.POSITION_CONTROL,
-                              targetPosition=-fingerAngle,
-                              force=100)
-  def get_joint_info(self):
-      joint_state = []
-      for jointIndex in range(self.numJoints):
-          joint_state.append(p.getJointState(self.kukaUid,jointIndex)[0])
-      print(joint_state)
+                              targetPosition=0,
+                              force=self.fingerTipForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              13,
+                              p.POSITION_CONTROL,
+                              targetPosition=0,
+                              force=self.fingerTipForce)
   def current_pos(self):
       return p.getLinkState(self.kukaUid, self.kukaEndEffectorIndex)[0]
   def current_orientation(self):
@@ -291,7 +289,7 @@ class Kuka:
         #reset the joint state (ignoring all dynamics, not recommended to use during simulation)
         for i in range(self.numJoints):
           p.resetJointState(self.kukaUid, i, jointPoses[i])
-      # #fingers
+      #fingers
       p.setJointMotorControl2(self.kukaUid,
                               7,
                               p.POSITION_CONTROL,
@@ -300,24 +298,24 @@ class Kuka:
       p.setJointMotorControl2(self.kukaUid,
                               8,
                               p.POSITION_CONTROL,
+                              targetPosition=-fingerAngle,
+                              force=self.fingerAForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              11,
+                              p.POSITION_CONTROL,
                               targetPosition=fingerAngle,
-                              force=10)
+                              force=self.fingerBForce)
+
       p.setJointMotorControl2(self.kukaUid,
                               10,
                               p.POSITION_CONTROL,
-                              targetPosition=-fingerAngle,
-                              force=10)
-      #
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         10,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=0,
-      #                         force=self.fingerTipForce)
-      # p.setJointMotorControl2(self.kukaUid,
-      #                         13,
-      #                         p.POSITION_CONTROL,
-      #                         targetPosition=0,
-      #                         force=self.fingerTipForce)
+                              targetPosition=0,
+                              force=self.fingerTipForce)
+      p.setJointMotorControl2(self.kukaUid,
+                              13,
+                              p.POSITION_CONTROL,
+                              targetPosition=0,
+                              force=self.fingerTipForce)
 
     else:
       for action in range(len(motorCommands)):

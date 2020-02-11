@@ -19,7 +19,7 @@ largeValObservation = 100
 
 RENDER_HEIGHT = 720
 RENDER_WIDTH = 960
-
+cylinder_path = '/home/yingfu/Documents/gym/pybullet_data/random_urdfs/n_1/n_8.urdf'
 
 class KukaGymFullEnv(gym.Env):
   metadata = {'render.modes': ['human', 'rgb_array'], 'video.frames_per_second': 50}
@@ -81,6 +81,8 @@ class KukaGymFullEnv(gym.Env):
     p.setTimeStep(self._timeStep)
     p.loadURDF(os.path.join(self._urdfRoot, "plane.urdf"), [0, 0, -1])
 
+    # p.loadURDF(cylinder_path, 0.5000000, 0.00000, -.820000,
+    #            0.000000, 0.000000, 0.0, 1.0)
     p.loadURDF(os.path.join(self._urdfRoot, "table/table.urdf"), 0.5000000, 0.00000, -.820000,
                0.000000, 0.000000, 0.0, 1.0)
 
@@ -88,7 +90,7 @@ class KukaGymFullEnv(gym.Env):
     ypos = 0 + 0.2 * random.random()
     ang = 3.14 * 0.5+ 3.1415925438 *random.random()
     orn = p.getQuaternionFromEuler([0, 0, ang])
-    self.blockUid = p.loadURDF(os.path.join(self._urdfRoot, "block.urdf"), xpos, ypos, -0.15,
+    self.blockUid = p.loadURDF(cylinder_path, xpos, ypos, -0.15,
                                orn[0], orn[1], orn[2], orn[3])
 
     p.setGravity(0, 0, -10)
